@@ -110,22 +110,15 @@ def generate_data(data_size, data_type):
     return data
 
 
-def benchmark(sort_function, data_sizes, data_types):
-    results = {}
-    for data_type in data_types:
-        results[data_type] = {}
-        for size in data_sizes:
-            data = generate_data(size, data_type)
-            start_time = time.perf_counter()
-            sort_function(data)
-            end_time = time.perf_counter()
-            results[data_type][size] = end_time - start_time
-
-    return results
+def benchmark(sort_function, data):
+    start_time = time.perf_counter_ns()
+    sort_function(data)
+    end_time = time.perf_counter_ns()
+    return end_time - start_time
 
 
 if __name__ == "__main__":
-    data_sizes = [100, 1000, 10000, 100000, 1000000]
+    data_sizes = [100, 1000, 10000, 100000]
     data_types_to_benchmark = [
         "random",
         "descending",
@@ -137,13 +130,21 @@ if __name__ == "__main__":
         "=sort",
         "!sort",
     ]
-    wikisort_results = benchmark(
-        wiki_sort.wikisort, data_sizes, data_types_to_benchmark
-    )
-    sorted_results = benchmark(sorted, data_sizes, data_types_to_benchmark)
+    for size in data_sizes:
+        for data_type in data_types_to_benchmark:
+            data = generate_data(size, data_type)
+            wikisort_time = benchmark(wiki_sort.wikisort, data)
+            sorted_time = benchmark(sorted, data)
 
-    print("Wikisort results:")
-    pprint(wikisort_results)
-
-    print("Built-in sorted results:")
-    pprint(sorted_results)
+            print(f"Data Size: {size}, Data Type: {data_type}")
+            print(f"Wikisort Time: {wikisort_time} seconds")
+            print(f"Built-in sorted Time: {sorted_time} seconds")
+            print()
+            fastest_sort = (
+                "Built-in sorted" if sorted_time < wikisort_time else "Wikisort"
+            )
+            fastest_time = min(wikisort_time, sorted_time)
+            print(
+                f"{fastest_sort} achieved the fastest time: {fastest_time} nanoseconds"
+            )
+            print("-" * 30)  # Optional separator for readability
