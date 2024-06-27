@@ -137,14 +137,17 @@ if __name__ == "__main__":
             sorted_time = benchmark(sorted, data)
 
             print(f"Data Size: {size}, Data Type: {data_type}")
-            print(f"Wikisort Time: {wikisort_time} seconds")
-            print(f"Built-in sorted Time: {sorted_time} seconds")
+            print(f"Wikisort Time: {wikisort_time} nanoseconds")
+            print(f"Built-in sorted Time: {sorted_time} nanoseconds")
             print()
             fastest_sort = (
                 "Built-in sorted" if sorted_time < wikisort_time else "Wikisort"
             )
             fastest_time = min(wikisort_time, sorted_time)
+            speedup_ratio = max(wikisort_time, sorted_time) / min(
+                wikisort_time, sorted_time
+            )
             print(
-                f"{fastest_sort} achieved the fastest time: {fastest_time} nanoseconds"
+                f"{fastest_sort} achieved the fastest time: {fastest_time} nanoseconds and was {speedup_ratio:.2f} times faster"
             )
             print("-" * 30)  # Optional separator for readability
