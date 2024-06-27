@@ -1,10 +1,10 @@
+#!/usr/bin/env python
 import random
 import time
-import wiki_sort
-from pprint import pprint
+import wikisort
 
 
-def wikisort(array):
+def python_wikisort(array):
     def reverse_range(array, start, end):
         while start < end:
             array[start], array[end] = array[end], array[start]
@@ -133,19 +133,21 @@ if __name__ == "__main__":
     for size in data_sizes:
         for data_type in data_types_to_benchmark:
             data = generate_data(size, data_type)
-            wikisort_time = benchmark(wiki_sort.wikisort, data)
+            wikisort_c_time = benchmark(wikisort.wikisort, data)
+            # wikisort_py_time = benchmark(python_wikisort, data)
             sorted_time = benchmark(sorted, data)
 
             print(f"Data Size: {size}, Data Type: {data_type}")
-            print(f"Wikisort Time: {wikisort_time} nanoseconds")
+            print(f"Wikisort Time: {wikisort_c_time} nanoseconds")
             print(f"Built-in sorted Time: {sorted_time} nanoseconds")
+            # print(f"Pure Python Wikisort Time: {wikisort_py_time} nanoseconds")
             print()
             fastest_sort = (
-                "Built-in sorted" if sorted_time < wikisort_time else "Wikisort"
+                "Wikisort" if wikisort_c_time < sorted_time else "Built-in Sorted"
             )
-            fastest_time = min(wikisort_time, sorted_time)
-            speedup_ratio = max(wikisort_time, sorted_time) / min(
-                wikisort_time, sorted_time
+            fastest_time = min(sorted_time, wikisort_c_time)
+            speedup_ratio = max(wikisort_c_time, sorted_time) / min(
+                wikisort_c_time, sorted_time
             )
             print(
                 f"{fastest_sort} achieved the fastest time: {fastest_time} nanoseconds and was {speedup_ratio:.2f} times faster"
