@@ -59,7 +59,7 @@ static PyObject *wikisort(PyObject *self, PyObject *args)
     /* Convert C array back to Python list */
     for (Py_ssize_t i = 0; i < n; ++i)
     {
-        PyObject *item = PyLong_AsLong(array[i]);
+        PyObject *item = PyLong_FromLong(array[i]);
         PyList_SetItem(array_obj, i, item);
     }
 
