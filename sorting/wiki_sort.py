@@ -1,6 +1,7 @@
 import random
 import time
 import wiki_sort
+from pprint import pprint
 
 
 def wikisort(array):
@@ -52,26 +53,97 @@ def wikisort(array):
     merge_sort(array, 0, len(array))
 
 
-def benchmark(func, data_sizes):
+def generate_data(data_size, data_type):
+    """
+    Generates data for different sorting scenarios.
+
+    Args:
+        data_size (int): The size of the data set.
+        data_type (str): The type of data to generate. Possible values are:
+            - 'random': Randomly shuffled integers.
+            - 'descending': Integers in descending order.
+            - 'ascending': Integers in ascending order.
+            - '3sort': Ascending, then 3 random exchanges.
+            - '+sort': Ascending, then 10 random values appended.
+            - '%sort': Ascending, then 1% elements replaced randomly.
+            - '~sort': Many duplicates (randomly inserted).
+            - '=sort': All elements equal.
+            - '!sort': Worst case (already sorted in descending order).
+
+    Returns:
+        list: The generated data list.
+    """
+
+    if data_type == "random":
+        data = list(range(data_size))
+        random.shuffle(data)
+    elif data_type == "descending":
+        data = list(range(data_size, 0, -1))
+    elif data_type == "ascending":
+        data = list(range(data_size))
+    elif data_type == "3sort":
+        data = list(range(data_size))
+        for _ in range(3):
+            i, j = random.sample(range(data_size), 2)
+            data[i], data[j] = data[j], data[i]
+    elif data_type == "+sort":
+        data = list(range(data_size))
+        data.extend(random.sample(range(data_size * 2), 10))
+    elif data_type == "%sort":
+        data = list(range(data_size))
+        num_replacements = int(data_size * 0.01)
+        for _ in range(num_replacements):
+            i = random.randint(0, data_size - 1)
+            data[i] = random.randint(0, data_size)
+    elif data_type == "~sort":
+        data = list(range(data_size))
+        for _ in range(data_size // 2):
+            i = random.randint(0, data_size - 1)
+            data.insert(i, data[random.randint(0, data_size - 1)])
+    elif data_type == "=sort":
+        data = [data_size] * data_size
+    elif data_type == "!sort":
+        data = list(range(data_size, 0, -1))
+    else:
+        raise ValueError(f"Invalid data type: {data_type}")
+
+    return data
+
+
+def benchmark(sort_function, data_sizes, data_types):
     results = {}
-    for size in data_sizes:
-        data = random.sample(range(1, size + 1), size)
-        start_time = time.time()
-        func(data.copy())
-        end_time = time.time()
-        results[size] = end_time - start_time
+    for data_type in data_types:
+        results[data_type] = {}
+        for size in data_sizes:
+            data = generate_data(size, data_type)
+            start_time = time.perf_counter()
+            sort_function(data)
+            end_time = time.perf_counter()
+            results[data_type][size] = end_time - start_time
+
     return results
 
 
 if __name__ == "__main__":
     data_sizes = [100, 1000, 10000, 100000, 1000000]
-    wikisort_results = benchmark(wiki_sort.wikisort, data_sizes)
-    sorted_results = benchmark(sorted, data_sizes)
+    data_types_to_benchmark = [
+        "random",
+        "descending",
+        "ascending",
+        "3sort",
+        "+sort",
+        "%sort",
+        "~sort",
+        "=sort",
+        "!sort",
+    ]
+    wikisort_results = benchmark(
+        wiki_sort.wikisort, data_sizes, data_types_to_benchmark
+    )
+    sorted_results = benchmark(sorted, data_sizes, data_types_to_benchmark)
 
     print("Wikisort results:")
-    for k, v in wikisort_results.items():
-        print(f"Size: {k}\nTime: {v}")
+    pprint(wikisort_results)
 
     print("Built-in sorted results:")
-    for k, v in sorted_results.items():
-        print(f"Size: {k}\nTime: {v}")
+    pprint(sorted_results)
